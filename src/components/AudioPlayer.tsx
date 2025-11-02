@@ -133,7 +133,7 @@ const AudioPlayer = ({ audioUrl, topics, onTopicClick, onTimeUpdate, onDurationC
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="w-full space-y-3 sticky top-4 z-10 bg-background/95 backdrop-blur-sm pb-3">
+    <div className="w-full space-y-3 sticky top-0 z-50 bg-background/98 backdrop-blur-md pb-4 pt-4 border-b border-border/40">
       <audio ref={audioRef} src={audioUrl} preload="metadata" />
       
       {/* Compact Player */}
@@ -217,10 +217,10 @@ const AudioPlayer = ({ audioUrl, topics, onTopicClick, onTimeUpdate, onDurationC
                   key={index}
                   onClick={() => handleTopicMarkerClick(topic.timestamp)}
                   className={cn(
-                    "w-full flex items-center gap-3 p-2 rounded-lg transition-all text-left",
+                    "w-full flex items-center gap-3 p-2.5 rounded-lg transition-all duration-300 text-left cursor-pointer group",
                     isActive 
-                      ? "bg-primary/10 border border-primary/20" 
-                      : "hover:bg-muted"
+                      ? "bg-primary/15 border border-primary/30 shadow-sm" 
+                      : "hover:bg-muted/80 hover:border hover:border-border/50 hover:shadow-sm"
                   )}
                 >
                   <div className={cn(

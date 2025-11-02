@@ -51,7 +51,7 @@ ${words && words.length > 0 ? 'You have access to word-level timestamps from the
 [Write 2-4 sentences capturing the main points, include key details like times, dates, names]
 
 **To-Dos:**
-[List specific action items with dashes, or write "- No action items mentioned" if none]
+[CRITICAL: Only list action items that the MESSAGE RECIPIENT needs to do. DO NOT include actions the sender will do themselves. If the sender says "I will do X", that is NOT a to-do. Only include tasks where the sender is asking/expecting the recipient to do something. If no recipient tasks exist, write "- No action items"]
 
 **Suggested Response:**
 [Write 1-3 sentences as a natural reply in first person, matching the tone of the message]
@@ -68,8 +68,8 @@ Example format:
 The landlord decided not to renew the lease. The tenant needs to find a new place by December 31st and is working with Carsten to find options.
 
 **To-Dos:**
-- Start looking for a new apartment
-- Contact Carsten for help finding places
+- Let me know if you need help with the apartment search
+- Share any places you find that look good
 
 **Suggested Response:**
 Thanks for letting me know. That's frustrating, but I'm glad Carsten is helping you look for something new.
