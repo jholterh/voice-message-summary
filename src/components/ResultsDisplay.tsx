@@ -58,28 +58,28 @@ const ResultsDisplay = ({ summary, transcription, onNewFile }: ResultsDisplayPro
     <div className="w-full max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Topics Section */}
       {sections.topics && (
-        <div className="bg-card rounded-2xl shadow-lg p-6 border border-border">
-          <div className="flex items-start justify-between gap-4 mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Tag className="w-5 h-5 text-primary" />
+        <div className="bg-card rounded-xl p-5 border border-border shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-start justify-between gap-4 mb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Tag className="w-4.5 h-4.5 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground">Topics</h3>
+              <h3 className="text-lg font-semibold text-foreground">Topics</h3>
             </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => handleCopy(sections.topics, 'topics')}
-              className="shrink-0 hover:bg-primary/10"
+              className="shrink-0 h-9 w-9 hover:bg-primary/10 transition-colors"
             >
               {copiedTopics ? (
                 <Check className="w-4 h-4 text-success" />
               ) : (
-                <Copy className="w-4 h-4" />
+                <Copy className="w-4 h-4 text-muted-foreground" />
               )}
             </Button>
           </div>
-          <div className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">
+          <div className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
             {sections.topics}
           </div>
         </div>
@@ -88,29 +88,31 @@ const ResultsDisplay = ({ summary, transcription, onNewFile }: ResultsDisplayPro
       {/* Summary Section - Most Prominent */}
       {sections.summary && (
         <div className="relative group">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary blur-xl opacity-20 rounded-3xl" />
-          <div className="relative bg-card rounded-3xl shadow-xl p-8 border border-border">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 blur-2xl opacity-30 rounded-3xl" />
+          <div className="relative bg-card rounded-2xl shadow-xl p-7 border border-border/50">
             <div className="flex items-start justify-between gap-4 mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                  <Sparkles className="w-6 h-6 text-white" />
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
+                  <Sparkles className="w-5.5 h-5.5 text-white" />
                 </div>
-                <h2 className="text-3xl font-bold text-foreground">Summary</h2>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Summary
+                </h2>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => handleCopy(sections.summary, 'summary')}
-                className="shrink-0 hover:bg-primary/10"
+                className="shrink-0 h-9 w-9 hover:bg-primary/10 transition-colors"
               >
                 {copiedSummary ? (
-                  <Check className="w-5 h-5 text-success" />
+                  <Check className="w-4.5 h-4.5 text-success" />
                 ) : (
-                  <Copy className="w-5 h-5" />
+                  <Copy className="w-4.5 h-4.5 text-muted-foreground" />
                 )}
               </Button>
             </div>
-            <p className="text-lg text-foreground leading-relaxed">
+            <p className="text-base text-foreground leading-relaxed">
               {sections.summary}
             </p>
           </div>
@@ -119,28 +121,28 @@ const ResultsDisplay = ({ summary, transcription, onNewFile }: ResultsDisplayPro
 
       {/* To-Dos Section */}
       {sections.todos && (
-        <div className="bg-card rounded-2xl shadow-lg p-6 border border-border">
-          <div className="flex items-start justify-between gap-4 mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
-                <CheckSquare className="w-5 h-5 text-success" />
+        <div className="bg-card rounded-xl p-5 border border-border shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-start justify-between gap-4 mb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-lg bg-success/10 flex items-center justify-center">
+                <CheckSquare className="w-4.5 h-4.5 text-success" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground">Action Items</h3>
+              <h3 className="text-lg font-semibold text-foreground">Action Items</h3>
             </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => handleCopy(sections.todos, 'todos')}
-              className="shrink-0 hover:bg-success/10"
+              className="shrink-0 h-9 w-9 hover:bg-success/10 transition-colors"
             >
               {copiedTodos ? (
                 <Check className="w-4 h-4 text-success" />
               ) : (
-                <Copy className="w-4 h-4" />
+                <Copy className="w-4 h-4 text-muted-foreground" />
               )}
             </Button>
           </div>
-          <div className="text-base text-foreground/90 leading-relaxed whitespace-pre-wrap">
+          <div className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
             {sections.todos}
           </div>
         </div>
@@ -148,68 +150,68 @@ const ResultsDisplay = ({ summary, transcription, onNewFile }: ResultsDisplayPro
 
       {/* Suggested Response Section */}
       {sections.response && (
-        <div className="bg-muted/50 rounded-2xl shadow-md p-6 border border-border/50">
-          <div className="flex items-start justify-between gap-4 mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center">
-                <MessageSquare className="w-5 h-5 text-secondary" />
+        <div className="bg-muted/40 rounded-xl p-5 border border-border/60 shadow-sm">
+          <div className="flex items-start justify-between gap-4 mb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-lg bg-secondary/10 flex items-center justify-center">
+                <MessageSquare className="w-4.5 h-4.5 text-secondary" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground">Suggested Reply</h3>
+              <h3 className="text-lg font-semibold text-foreground">Suggested Reply</h3>
             </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => handleCopy(sections.response, 'response')}
-              className="shrink-0 hover:bg-secondary/10"
+              className="shrink-0 h-9 w-9 hover:bg-secondary/10 transition-colors"
             >
               {copiedResponse ? (
                 <Check className="w-4 h-4 text-success" />
               ) : (
-                <Copy className="w-4 h-4" />
+                <Copy className="w-4 h-4 text-muted-foreground" />
               )}
             </Button>
           </div>
-          <p className="text-base text-muted-foreground leading-relaxed italic">
+          <p className="text-sm text-muted-foreground leading-relaxed italic">
             {sections.response}
           </p>
         </div>
       )}
 
-      {/* Full Transcription Card - Secondary */}
-      <div className="bg-card rounded-3xl shadow-lg p-8 border border-border">
+      {/* Full Transcription Card */}
+      <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
         <div className="flex items-start justify-between gap-4 mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
-              <FileText className="w-5 h-5 text-muted-foreground" />
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+              <FileText className="w-4.5 h-4.5 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-semibold text-foreground">Full Transcription</h3>
+            <h3 className="text-lg font-semibold text-foreground">Full Transcription</h3>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => handleCopy(transcription, 'transcription')}
-            className="shrink-0 hover:bg-muted"
+            className="shrink-0 h-9 w-9 hover:bg-muted transition-colors"
           >
             {copiedTranscription ? (
-              <Check className="w-5 h-5 text-success" />
+              <Check className="w-4.5 h-4.5 text-success" />
             ) : (
-              <Copy className="w-5 h-5" />
+              <Copy className="w-4.5 h-4.5 text-muted-foreground" />
             )}
           </Button>
         </div>
-        <div className="max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-          <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
+        <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
             {transcription}
           </p>
         </div>
       </div>
 
       {/* Process Another Button */}
-      <div className="flex justify-center pt-4">
+      <div className="flex justify-center pt-6">
         <Button
           onClick={onNewFile}
           size="lg"
-          className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white px-8 py-6 text-lg rounded-2xl shadow-lg"
+          className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white px-8 py-3 text-base rounded-xl shadow-lg hover:shadow-xl transition-all"
         >
           Process Another Voice Message
         </Button>
@@ -217,15 +219,15 @@ const ResultsDisplay = ({ summary, transcription, onNewFile }: ResultsDisplayPro
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
-          width: 8px;
+          width: 6px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
           background: hsl(var(--muted));
-          border-radius: 4px;
+          border-radius: 3px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
           background: hsl(var(--muted-foreground) / 0.3);
-          border-radius: 4px;
+          border-radius: 3px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: hsl(var(--muted-foreground) / 0.5);
