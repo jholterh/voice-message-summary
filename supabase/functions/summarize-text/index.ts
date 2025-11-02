@@ -40,31 +40,38 @@ serve(async (req) => {
           },
           { 
             role: 'user', 
-            content: `Analyze this voice message and provide a structured response with these EXACT sections:
+            content: `Analyze this voice message and provide a structured response. YOU MUST use these EXACT section headers with double asterisks:
 
 **Topics:**
-- List 2-5 main topics/themes (keep each to 2-4 words max)
-- Use bullet points with a dash
-- Example format: "- Project deadline\n- Budget approval"
+[List 2-5 main topics, one per line with a dash, keep each to 2-4 words max]
 
 **Summary:**
-- Write 2-4 sentences capturing the main points
-- Include key details (times, dates, names, places)
-- Be comprehensive but concise
+[Write 2-4 sentences capturing the main points, include key details like times, dates, names]
 
 **To-Dos:**
-- List specific action items for the recipient
-- Start each with an action verb when possible
-- If no action items exist, write "No action items mentioned"
-- Use bullet points with a dash
+[List specific action items with dashes, or write "- No action items mentioned" if none]
 
 **Suggested Response:**
-- Write a 1-3 sentence natural reply
-- Match the tone of the original message
-- Address main points and any to-dos
-- Write in first person as if the user is responding
+[Write 1-3 sentences as a natural reply in first person, matching the tone of the message]
 
-Transcription:
+IMPORTANT: You MUST include all four section headers exactly as shown above, even if a section is empty.
+
+Example format:
+**Topics:**
+- Housing situation
+- Lease renewal
+
+**Summary:**
+The landlord decided not to renew the lease. The tenant needs to find a new place by December 31st.
+
+**To-Dos:**
+- Start looking for a new apartment
+- Contact Carsten for help finding places
+
+**Suggested Response:**
+Thanks for letting me know. That's frustrating, but I'm glad Carsten is helping you look for something new.
+
+Now analyze this transcription:
 ${text}`
           }
         ],
