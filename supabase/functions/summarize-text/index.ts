@@ -36,26 +36,35 @@ serve(async (req) => {
         messages: [
           { 
             role: 'system', 
-            content: 'You are a helpful assistant that analyzes voice message transcriptions. You provide structured analysis including topics, summary, action items, and suggested responses.'
+            content: 'You are a helpful assistant that analyzes voice message transcriptions. Provide structured analysis with clear sections. Be concise and actionable.'
           },
           { 
             role: 'user', 
-            content: `Please analyze this voice message transcription and provide a structured response in the following format:
+            content: `Analyze this voice message and provide a structured response with these EXACT sections:
 
 **Topics:**
-List the main topics discussed (bullet points)
+- List 2-5 main topics/themes (keep each to 2-4 words max)
+- Use bullet points with a dash
+- Example format: "- Project deadline\n- Budget approval"
 
 **Summary:**
-A 2-4 sentence summary of the main message
+- Write 2-4 sentences capturing the main points
+- Include key details (times, dates, names, places)
+- Be comprehensive but concise
 
 **To-Dos:**
-List any action items, tasks, or requests mentioned (or state "None identified" if there are no action items)
+- List specific action items for the recipient
+- Start each with an action verb when possible
+- If no action items exist, write "No action items mentioned"
+- Use bullet points with a dash
 
-**Example Response:**
-Suggest a brief appropriate response to this message
+**Suggested Response:**
+- Write a 1-3 sentence natural reply
+- Match the tone of the original message
+- Address main points and any to-dos
+- Write in first person as if the user is responding
 
-Here's the transcription to analyze:
-
+Transcription:
 ${text}`
           }
         ],
