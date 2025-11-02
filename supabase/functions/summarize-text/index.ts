@@ -36,11 +36,27 @@ serve(async (req) => {
         messages: [
           { 
             role: 'system', 
-            content: 'You are a helpful assistant that creates concise, clear summaries of voice message transcriptions. Your summaries should be 2-4 sentences long and capture the main points and key information from the message. Focus on what the speaker is trying to communicate.'
+            content: 'You are a helpful assistant that analyzes voice message transcriptions. You provide structured analysis including topics, summary, action items, and suggested responses.'
           },
           { 
             role: 'user', 
-            content: `Please provide a concise summary (2-4 sentences) of this voice message transcription:\n\n${text}`
+            content: `Please analyze this voice message transcription and provide a structured response in the following format:
+
+**Topics:**
+List the main topics discussed (bullet points)
+
+**Summary:**
+A 2-4 sentence summary of the main message
+
+**To-Dos:**
+List any action items, tasks, or requests mentioned (or state "None identified" if there are no action items)
+
+**Example Response:**
+Suggest a brief appropriate response to this message
+
+Here's the transcription to analyze:
+
+${text}`
           }
         ],
       }),

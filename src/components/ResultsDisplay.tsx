@@ -35,7 +35,7 @@ const ResultsDisplay = ({ summary, transcription, onNewFile }: ResultsDisplayPro
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
-              <h2 className="text-3xl font-bold text-foreground">Summary</h2>
+              <h2 className="text-3xl font-bold text-foreground">Analysis</h2>
             </div>
             <Button
               variant="ghost"
@@ -50,9 +50,9 @@ const ResultsDisplay = ({ summary, transcription, onNewFile }: ResultsDisplayPro
               )}
             </Button>
           </div>
-          <p className="text-lg text-foreground leading-relaxed">
+          <div className="text-base text-foreground leading-relaxed whitespace-pre-wrap space-y-3">
             {summary}
-          </p>
+          </div>
         </div>
       </div>
 
