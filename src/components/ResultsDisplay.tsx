@@ -1,13 +1,20 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Check, Copy, FileText, Sparkles, CheckSquare, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import AudioPlayer from '@/components/AudioPlayer';
 
+interface WordTimestamp {
+  word: string;
+  start: number;
+  end: number;
+}
+
 interface ResultsDisplayProps {
   summary: string;
   transcription: string;
   audioUrl?: string;
+  words?: WordTimestamp[];
   onNewFile: () => void;
 }
 
@@ -16,11 +23,16 @@ interface ParsedTopic {
   timestamp: number;
 }
 
-const ResultsDisplay = ({ summary, transcription, audioUrl, onNewFile }: ResultsDisplayProps) => {
+const ResultsDisplay = ({ summary, transcription, audioUrl, words = [], onNewFile }: ResultsDisplayProps) => {
   const [copiedSummary, setCopiedSummary] = useState(false);
   const [copiedTranscription, setCopiedTranscription] = useState(false);
   const [copiedTodos, setCopiedTodos] = useState(false);
   const [copiedResponse, setCopiedResponse] = useState(false);
+  const [currentAudioTime, setCurrentAudioTime] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
+  const audioPlayerRef = useRef<HTMLDivElement>(null);
+  const transcriptRef = useRef<HTMLDivElement>(null);
+  const currentWordRef = useRef<HTMLSpanElement>(null);
 
   const handleCopy = async (text: string, type: 'summary' | 'transcription' | 'todos' | 'response') => {
     await navigator.clipboard.writeText(text);
@@ -57,7 +69,7 @@ const ResultsDisplay = ({ summary, transcription, audioUrl, onNewFile }: Results
   if (todosMatch) sections.todos = todosMatch[1].trim();
   if (responseMatch) sections.response = responseMatch[1].trim();
 
-  // Parse topics with timestamps
+  // Parse topics with timestamps and validate against audio duration
   const parsedTopics: ParsedTopic[] = [];
   if (sections.topics) {
     const topicLines = sections.topics.split('\n').filter(line => line.trim().startsWith('-'));
@@ -66,25 +78,69 @@ const ResultsDisplay = ({ summary, transcription, audioUrl, onNewFile }: Results
       if (match) {
         const [, name, minutes, seconds] = match;
         const timestamp = parseInt(minutes) * 60 + parseInt(seconds);
-        parsedTopics.push({ name, timestamp });
+        // Only add topics with valid timestamps (less than audio duration or if duration unknown)
+        if (audioDuration === 0 || timestamp < audioDuration) {
+          parsedTopics.push({ name, timestamp });
+        }
       }
     });
   }
 
   const handleTopicClick = (timestamp: number) => {
     // Scroll to audio player if not visible
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
+
+  const handleAudioTimeUpdate = (time: number) => {
+    setCurrentAudioTime(time);
+  };
+
+  const handleAudioDurationChange = (duration: number) => {
+    setAudioDuration(duration);
+  };
+
+  // Find the current word being spoken
+  const getCurrentWordIndex = () => {
+    if (!words.length) return -1;
+    return words.findIndex((word, index) => {
+      const nextWord = words[index + 1];
+      return currentAudioTime >= word.start && (!nextWord || currentAudioTime < nextWord.start);
+    });
+  };
+
+  const currentWordIndex = getCurrentWordIndex();
+
+  // Auto-scroll to current word in transcript
+  useEffect(() => {
+    if (currentWordRef.current && transcriptRef.current) {
+      const wordElement = currentWordRef.current;
+      const containerElement = transcriptRef.current;
+      
+      // Check if word is visible in container
+      const wordRect = wordElement.getBoundingClientRect();
+      const containerRect = containerElement.getBoundingClientRect();
+      
+      if (wordRect.top < containerRect.top || wordRect.bottom > containerRect.bottom) {
+        wordElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [currentWordIndex]);
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Audio Player */}
       {audioUrl && parsedTopics.length > 0 && (
-        <AudioPlayer 
-          audioUrl={audioUrl} 
-          topics={parsedTopics}
-          onTopicClick={handleTopicClick}
-        />
+        <div ref={audioPlayerRef}>
+          <AudioPlayer 
+            audioUrl={audioUrl} 
+            topics={parsedTopics}
+            onTopicClick={handleTopicClick}
+            onTimeUpdate={handleAudioTimeUpdate}
+            onDurationChange={handleAudioDurationChange}
+          />
+        </div>
       )}
 
 
@@ -202,10 +258,27 @@ const ResultsDisplay = ({ summary, transcription, audioUrl, onNewFile }: Results
             )}
           </Button>
         </div>
-        <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-            {transcription}
-          </p>
+        <div ref={transcriptRef} className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+          {words.length > 0 ? (
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {words.map((word, index) => (
+                <span
+                  key={index}
+                  ref={index === currentWordIndex ? currentWordRef : null}
+                  className={cn(
+                    "transition-colors duration-150",
+                    index === currentWordIndex && "bg-primary/20 text-primary font-medium px-0.5 rounded"
+                  )}
+                >
+                  {word.word}{' '}
+                </span>
+              ))}
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+              {transcription}
+            </p>
+          )}
         </div>
       </div>
 

@@ -8,10 +8,16 @@ import ResultsDisplay from '@/components/ResultsDisplay';
 
 type ProcessingStage = 'idle' | 'uploading' | 'transcribing' | 'summarizing';
 
+interface WordTimestamp {
+  word: string;
+  start: number;
+  end: number;
+}
+
 const Index = () => {
   const { toast } = useToast();
   const [stage, setStage] = useState<ProcessingStage>('idle');
-  const [results, setResults] = useState<{ summary: string; transcription: string; audioUrl?: string } | null>(null);
+  const [results, setResults] = useState<{ summary: string; transcription: string; audioUrl?: string; words?: WordTimestamp[] } | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
 
   const validateFile = (file: File): boolean => {
@@ -91,6 +97,7 @@ const Index = () => {
             summary: summaryData.summary,
             transcription: transcriptionData.text,
             audioUrl: audioUrl,
+            words: transcriptionData.words || [],
           });
 
           setStage('idle');
@@ -197,6 +204,7 @@ const Index = () => {
               summary={results.summary}
               transcription={results.transcription}
               audioUrl={results.audioUrl}
+              words={results.words}
               onNewFile={handleNewFile}
             />
           )}

@@ -12,9 +12,11 @@ interface AudioPlayerProps {
   audioUrl: string;
   topics: Topic[];
   onTopicClick?: (timestamp: number) => void;
+  onTimeUpdate?: (currentTime: number) => void;
+  onDurationChange?: (duration: number) => void;
 }
 
-const AudioPlayer = ({ audioUrl, topics, onTopicClick }: AudioPlayerProps) => {
+const AudioPlayer = ({ audioUrl, topics, onTopicClick, onTimeUpdate, onDurationChange }: AudioPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -30,10 +32,18 @@ const AudioPlayer = ({ audioUrl, topics, onTopicClick }: AudioPlayerProps) => {
 
     const handleLoadedMetadata = () => {
       setDuration(audio.duration);
+      if (onDurationChange) {
+        onDurationChange(audio.duration);
+      }
     };
 
     const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
+      
+      // Notify parent of time update for transcript highlighting
+      if (onTimeUpdate) {
+        onTimeUpdate(audio.currentTime);
+      }
       
       // Update active topic based on current time
       const currentTopicIndex = topics.findIndex((topic, index) => {
@@ -57,7 +67,7 @@ const AudioPlayer = ({ audioUrl, topics, onTopicClick }: AudioPlayerProps) => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [topics]);
+  }, [topics, onTimeUpdate, onDurationChange]);
 
   const togglePlayPause = () => {
     const audio = audioRef.current;
@@ -123,11 +133,11 @@ const AudioPlayer = ({ audioUrl, topics, onTopicClick }: AudioPlayerProps) => {
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="w-full space-y-3">
+    <div className="w-full space-y-3 sticky top-4 z-10 bg-background/95 backdrop-blur-sm pb-3">
       <audio ref={audioRef} src={audioUrl} preload="metadata" />
       
       {/* Compact Player */}
-      <div className="bg-card rounded-lg border border-border p-4">
+      <div className="bg-card rounded-lg border border-border p-4 shadow-lg">
         <div className="flex items-center gap-3">
           {/* Play/Pause Button */}
           <Button
