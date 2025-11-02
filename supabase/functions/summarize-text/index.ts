@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text } = await req.json();
+    const { text, words } = await req.json();
     
     if (!text) {
       throw new Error('No text provided for summarization');
@@ -36,14 +36,16 @@ serve(async (req) => {
         messages: [
           { 
             role: 'system', 
-            content: 'You are a helpful assistant that analyzes voice message transcriptions. Provide structured analysis with clear sections. Be concise and actionable.'
+            content: `You are a helpful assistant that analyzes voice message transcriptions with timestamp awareness. Provide structured analysis with clear sections. Be concise and actionable.
+
+${words && words.length > 0 ? 'You have access to word-level timestamps from the transcription. Use these to identify when each topic is discussed and include timestamps in MM:SS format for each topic.' : 'Estimate timestamps based on the flow of conversation.'}`
           },
           { 
             role: 'user', 
             content: `Analyze this voice message and provide a structured response. YOU MUST use these EXACT section headers with double asterisks:
 
 **Topics:**
-[List 2-5 main topics, one per line with a dash, keep each to 2-4 words max]
+[List 2-5 main topics with timestamps in format: "- Topic Name [MM:SS]". Keep each topic name to 2-4 words max]
 
 **Summary:**
 [Write 2-4 sentences capturing the main points, include key details like times, dates, names]
@@ -54,15 +56,16 @@ serve(async (req) => {
 **Suggested Response:**
 [Write 1-3 sentences as a natural reply in first person, matching the tone of the message]
 
-IMPORTANT: You MUST include all four section headers exactly as shown above, even if a section is empty.
+IMPORTANT: You MUST include all four section headers exactly as shown above. Each topic MUST have a timestamp in [MM:SS] format.
 
 Example format:
 **Topics:**
-- Housing situation
-- Lease renewal
+- Housing situation [0:05]
+- Lease renewal [0:32]
+- Moving plans [1:15]
 
 **Summary:**
-The landlord decided not to renew the lease. The tenant needs to find a new place by December 31st.
+The landlord decided not to renew the lease. The tenant needs to find a new place by December 31st and is working with Carsten to find options.
 
 **To-Dos:**
 - Start looking for a new apartment
@@ -70,6 +73,12 @@ The landlord decided not to renew the lease. The tenant needs to find a new plac
 
 **Suggested Response:**
 Thanks for letting me know. That's frustrating, but I'm glad Carsten is helping you look for something new.
+
+${words && words.length > 0 ? `
+Word-level timestamps (first 100 words as reference):
+${words.slice(0, 100).map((w: any) => `"${w.word}" at ${Math.floor(w.start / 60)}:${Math.floor(w.start % 60).toString().padStart(2, '0')}`).join(', ')}...
+
+Use these timestamps to accurately place each topic.` : ''}
 
 Now analyze this transcription:
 ${text}`

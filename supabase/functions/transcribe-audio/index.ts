@@ -63,7 +63,8 @@ serve(async (req) => {
     const blob = new Blob([binaryAudio], { type: 'audio/webm' });
     formData.append('file', blob, 'audio.webm');
     formData.append('model', 'whisper-1');
-    formData.append('response_format', 'json');
+    formData.append('response_format', 'verbose_json');
+    formData.append('timestamp_granularities[]', 'word');
 
     // Send to OpenAI Whisper
     const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
@@ -84,7 +85,10 @@ serve(async (req) => {
     console.log('Transcription completed successfully');
 
     return new Response(
-      JSON.stringify({ text: result.text }),
+      JSON.stringify({ 
+        text: result.text,
+        words: result.words || []
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 

@@ -1,20 +1,28 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Check, Copy, FileText, Sparkles, Tag, CheckSquare, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import AudioPlayer from '@/components/AudioPlayer';
 
 interface ResultsDisplayProps {
   summary: string;
   transcription: string;
+  audioUrl?: string;
   onNewFile: () => void;
 }
 
-const ResultsDisplay = ({ summary, transcription, onNewFile }: ResultsDisplayProps) => {
+interface ParsedTopic {
+  name: string;
+  timestamp: number;
+}
+
+const ResultsDisplay = ({ summary, transcription, audioUrl, onNewFile }: ResultsDisplayProps) => {
   const [copiedSummary, setCopiedSummary] = useState(false);
   const [copiedTranscription, setCopiedTranscription] = useState(false);
   const [copiedTopics, setCopiedTopics] = useState(false);
   const [copiedTodos, setCopiedTodos] = useState(false);
   const [copiedResponse, setCopiedResponse] = useState(false);
+  const topicsSectionRef = useRef<HTMLDivElement>(null);
 
   const handleCopy = async (text: string, type: 'summary' | 'transcription' | 'topics' | 'todos' | 'response') => {
     await navigator.clipboard.writeText(text);
@@ -54,11 +62,39 @@ const ResultsDisplay = ({ summary, transcription, onNewFile }: ResultsDisplayPro
   if (todosMatch) sections.todos = todosMatch[1].trim();
   if (responseMatch) sections.response = responseMatch[1].trim();
 
+  // Parse topics with timestamps
+  const parsedTopics: ParsedTopic[] = [];
+  if (sections.topics) {
+    const topicLines = sections.topics.split('\n').filter(line => line.trim().startsWith('-'));
+    topicLines.forEach(line => {
+      const match = line.match(/- (.+?) \[(\d+):(\d+)\]/);
+      if (match) {
+        const [, name, minutes, seconds] = match;
+        const timestamp = parseInt(minutes) * 60 + parseInt(seconds);
+        parsedTopics.push({ name, timestamp });
+      }
+    });
+  }
+
+  const handleTopicClick = (timestamp: number) => {
+    // Scroll to audio player if not visible
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Audio Player */}
+      {audioUrl && parsedTopics.length > 0 && (
+        <AudioPlayer 
+          audioUrl={audioUrl} 
+          topics={parsedTopics}
+          onTopicClick={handleTopicClick}
+        />
+      )}
+
       {/* Topics Section */}
       {sections.topics && (
-        <div className="bg-card rounded-xl p-5 border border-border shadow-sm hover:shadow-md transition-shadow">
+        <div ref={topicsSectionRef} className="bg-card rounded-xl p-5 border border-border shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-start justify-between gap-4 mb-3">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -79,8 +115,19 @@ const ResultsDisplay = ({ summary, transcription, onNewFile }: ResultsDisplayPro
               )}
             </Button>
           </div>
-          <div className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
-            {sections.topics}
+          <div className="flex flex-wrap gap-2">
+            {parsedTopics.map((topic, index) => (
+              <button
+                key={index}
+                onClick={() => handleTopicClick(topic.timestamp)}
+                className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/40 transition-all cursor-pointer"
+              >
+                <span className="text-sm font-medium text-primary">{topic.name}</span>
+                <span className="text-xs text-primary/60 group-hover:text-primary/80">
+                  {Math.floor(topic.timestamp / 60)}:{(topic.timestamp % 60).toString().padStart(2, '0')}
+                </span>
+              </button>
+            ))}
           </div>
         </div>
       )}

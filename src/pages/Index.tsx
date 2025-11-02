@@ -11,7 +11,8 @@ type ProcessingStage = 'idle' | 'uploading' | 'transcribing' | 'summarizing';
 const Index = () => {
   const { toast } = useToast();
   const [stage, setStage] = useState<ProcessingStage>('idle');
-  const [results, setResults] = useState<{ summary: string; transcription: string } | null>(null);
+  const [results, setResults] = useState<{ summary: string; transcription: string; audioUrl?: string } | null>(null);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
 
   const validateFile = (file: File): boolean => {
     // Check file size (10MB limit)
@@ -48,6 +49,7 @@ const Index = () => {
 
     setStage('uploading');
     setResults(null);
+    setAudioFile(file);
 
     try {
       // Convert file to base64
@@ -72,16 +74,23 @@ const Index = () => {
           // Step 2: Summarize
           setStage('summarizing');
           const { data: summaryData, error: summaryError } = await supabase.functions.invoke('summarize-text', {
-            body: { text: transcription }
+            body: { 
+              text: transcriptionData.text,
+              words: transcriptionData.words || []
+            }
           });
 
           if (summaryError) throw summaryError;
           if (!summaryData?.summary) throw new Error('No summary received');
 
+          // Create blob URL for audio playback
+          const audioUrl = URL.createObjectURL(file);
+
           // Display results
           setResults({
             summary: summaryData.summary,
-            transcription: transcription,
+            transcription: transcriptionData.text,
+            audioUrl: audioUrl,
           });
 
           setStage('idle');
@@ -127,7 +136,12 @@ const Index = () => {
   };
 
   const handleNewFile = () => {
+    // Clean up the previous audio URL
+    if (results?.audioUrl) {
+      URL.revokeObjectURL(results.audioUrl);
+    }
     setResults(null);
+    setAudioFile(null);
     setStage('idle');
   };
 
@@ -182,6 +196,7 @@ const Index = () => {
             <ResultsDisplay
               summary={results.summary}
               transcription={results.transcription}
+              audioUrl={results.audioUrl}
               onNewFile={handleNewFile}
             />
           )}
