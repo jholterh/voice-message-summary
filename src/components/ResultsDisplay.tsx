@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Check, Copy, FileText, Sparkles, Tag, CheckSquare, MessageSquare } from 'lucide-react';
+import { Check, Copy, FileText, Sparkles, CheckSquare, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import AudioPlayer from '@/components/AudioPlayer';
@@ -19,12 +19,10 @@ interface ParsedTopic {
 const ResultsDisplay = ({ summary, transcription, audioUrl, onNewFile }: ResultsDisplayProps) => {
   const [copiedSummary, setCopiedSummary] = useState(false);
   const [copiedTranscription, setCopiedTranscription] = useState(false);
-  const [copiedTopics, setCopiedTopics] = useState(false);
   const [copiedTodos, setCopiedTodos] = useState(false);
   const [copiedResponse, setCopiedResponse] = useState(false);
-  const topicsSectionRef = useRef<HTMLDivElement>(null);
 
-  const handleCopy = async (text: string, type: 'summary' | 'transcription' | 'topics' | 'todos' | 'response') => {
+  const handleCopy = async (text: string, type: 'summary' | 'transcription' | 'todos' | 'response') => {
     await navigator.clipboard.writeText(text);
     if (type === 'summary') {
       setCopiedSummary(true);
@@ -32,9 +30,6 @@ const ResultsDisplay = ({ summary, transcription, audioUrl, onNewFile }: Results
     } else if (type === 'transcription') {
       setCopiedTranscription(true);
       setTimeout(() => setCopiedTranscription(false), 2000);
-    } else if (type === 'topics') {
-      setCopiedTopics(true);
-      setTimeout(() => setCopiedTopics(false), 2000);
     } else if (type === 'todos') {
       setCopiedTodos(true);
       setTimeout(() => setCopiedTodos(false), 2000);
@@ -92,45 +87,6 @@ const ResultsDisplay = ({ summary, transcription, audioUrl, onNewFile }: Results
         />
       )}
 
-      {/* Topics Section */}
-      {sections.topics && (
-        <div ref={topicsSectionRef} className="bg-card rounded-xl p-5 border border-border shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-start justify-between gap-4 mb-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Tag className="w-4.5 h-4.5 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground">Topics</h3>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleCopy(sections.topics, 'topics')}
-              className="shrink-0 h-9 w-9 hover:bg-primary/10 transition-colors"
-            >
-              {copiedTopics ? (
-                <Check className="w-4 h-4 text-success" />
-              ) : (
-                <Copy className="w-4 h-4 text-muted-foreground" />
-              )}
-            </Button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {parsedTopics.map((topic, index) => (
-              <button
-                key={index}
-                onClick={() => handleTopicClick(topic.timestamp)}
-                className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/40 transition-all cursor-pointer"
-              >
-                <span className="text-sm font-medium text-primary">{topic.name}</span>
-                <span className="text-xs text-primary/60 group-hover:text-primary/80">
-                  {Math.floor(topic.timestamp / 60)}:{(topic.timestamp % 60).toString().padStart(2, '0')}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Summary Section - Most Prominent */}
       {sections.summary && (
@@ -197,7 +153,7 @@ const ResultsDisplay = ({ summary, transcription, audioUrl, onNewFile }: Results
 
       {/* Suggested Response Section */}
       {sections.response && (
-        <div className="bg-muted/40 rounded-xl p-5 border border-border/60 shadow-sm">
+        <div className="bg-card rounded-xl p-5 border border-border shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-start justify-between gap-4 mb-3">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-lg bg-secondary/10 flex items-center justify-center">
@@ -218,7 +174,7 @@ const ResultsDisplay = ({ summary, transcription, audioUrl, onNewFile }: Results
               )}
             </Button>
           </div>
-          <p className="text-sm text-muted-foreground leading-relaxed italic">
+          <p className="text-sm text-foreground/80 leading-relaxed">
             {sections.response}
           </p>
         </div>

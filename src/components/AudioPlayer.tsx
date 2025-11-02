@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, Download } from 'lucide-react';
+import { Play, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 
 interface Topic {
@@ -19,8 +18,6 @@ const AudioPlayer = ({ audioUrl, topics, onTopicClick }: AudioPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [activeTopicIndex, setActiveTopicIndex] = useState<number | null>(null);
   
@@ -88,34 +85,11 @@ const AudioPlayer = ({ audioUrl, topics, onTopicClick }: AudioPlayerProps) => {
     setCurrentTime(newTime);
   };
 
-  const handleVolumeChange = (value: number[]) => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    
-    const newVolume = value[0];
-    audio.volume = newVolume;
-    setVolume(newVolume);
-    setIsMuted(newVolume === 0);
-  };
-
-  const toggleMute = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (isMuted) {
-      audio.volume = volume || 0.5;
-      setIsMuted(false);
-    } else {
-      audio.volume = 0;
-      setIsMuted(true);
-    }
-  };
-
   const handlePlaybackRateChange = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const rates = [0.5, 0.75, 1, 1.25, 1.5, 2];
+    const rates = [1, 1.25, 1.5, 1.75, 2, 2.5, 3];
     const currentIndex = rates.indexOf(playbackRate);
     const nextRate = rates[(currentIndex + 1) % rates.length];
     
@@ -140,15 +114,6 @@ const AudioPlayer = ({ audioUrl, topics, onTopicClick }: AudioPlayerProps) => {
     }
   };
 
-  const handleDownload = () => {
-    const a = document.createElement('a');
-    a.href = audioUrl;
-    a.download = 'voice-message.webm';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
-
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -158,133 +123,114 @@ const AudioPlayer = ({ audioUrl, topics, onTopicClick }: AudioPlayerProps) => {
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="w-full bg-card rounded-xl border border-border shadow-lg p-6 space-y-4 sticky top-4 z-10">
+    <div className="w-full space-y-3">
       <audio ref={audioRef} src={audioUrl} preload="metadata" />
       
-      {/* Waveform / Progress Bar */}
-      <div className="space-y-2">
-        <div
-          ref={progressBarRef}
-          onClick={handleProgressClick}
-          className="relative h-16 bg-muted rounded-lg cursor-pointer overflow-hidden group"
-        >
-          {/* Progress fill */}
-          <div 
-            className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-secondary transition-all"
-            style={{ width: `${progress}%` }}
-          />
-          
-          {/* Waveform visualization (simplified bars) */}
-          <div className="absolute inset-0 flex items-center justify-around px-1">
-            {Array.from({ length: 60 }).map((_, i) => {
-              const height = Math.random() * 60 + 20;
-              const isPassed = (i / 60) * 100 < progress;
+      {/* Compact Player */}
+      <div className="bg-card rounded-lg border border-border p-4">
+        <div className="flex items-center gap-3">
+          {/* Play/Pause Button */}
+          <Button
+            onClick={togglePlayPause}
+            size="icon"
+            className="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 flex-shrink-0"
+          >
+            {isPlaying ? (
+              <Pause className="h-4 w-4 text-white" fill="white" />
+            ) : (
+              <Play className="h-4 w-4 text-white ml-0.5" fill="white" />
+            )}
+          </Button>
+
+          {/* Progress Bar */}
+          <div className="flex-1 space-y-1">
+            <div
+              ref={progressBarRef}
+              onClick={handleProgressClick}
+              className="relative h-1.5 bg-muted rounded-full cursor-pointer overflow-hidden group"
+            >
+              {/* Progress fill */}
+              <div 
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-secondary transition-all"
+                style={{ width: `${progress}%` }}
+              />
+              
+              {/* Topic markers */}
+              {topics.map((topic, index) => {
+                const position = (topic.timestamp / duration) * 100;
+                const isActive = activeTopicIndex === index;
+                return (
+                  <div
+                    key={index}
+                    className={cn(
+                      "absolute top-0 bottom-0 w-0.5 cursor-pointer transition-all",
+                      isActive ? "bg-accent" : "bg-secondary/60 hover:bg-secondary"
+                    )}
+                    style={{ left: `${position}%` }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTopicMarkerClick(topic.timestamp);
+                    }}
+                  />
+                );
+              })}
+            </div>
+
+            {/* Time display */}
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{formatTime(currentTime)}</span>
+              <span>{formatTime(duration)}</span>
+            </div>
+          </div>
+
+          {/* Playback speed */}
+          <Button
+            onClick={handlePlaybackRateChange}
+            variant="outline"
+            size="sm"
+            className="font-semibold min-w-[55px] h-8 flex-shrink-0"
+          >
+            {playbackRate}x
+          </Button>
+        </div>
+      </div>
+
+      {/* Segments/Topics */}
+      {topics.length > 0 && (
+        <div className="bg-card rounded-lg border border-border p-4">
+          <h3 className="text-sm font-semibold mb-3 text-foreground">Segments</h3>
+          <div className="space-y-2">
+            {topics.map((topic, index) => {
+              const isActive = activeTopicIndex === index;
               return (
-                <div
-                  key={i}
+                <button
+                  key={index}
+                  onClick={() => handleTopicMarkerClick(topic.timestamp)}
                   className={cn(
-                    "w-1 rounded-full transition-colors",
-                    isPassed ? "bg-white/40" : "bg-muted-foreground/20"
+                    "w-full flex items-center gap-3 p-2 rounded-lg transition-all text-left",
+                    isActive 
+                      ? "bg-primary/10 border border-primary/20" 
+                      : "hover:bg-muted"
                   )}
-                  style={{ height: `${height}%` }}
-                />
+                >
+                  <div className={cn(
+                    "text-xs font-medium min-w-[45px]",
+                    isActive ? "text-primary" : "text-muted-foreground"
+                  )}>
+                    {formatTime(topic.timestamp)}
+                  </div>
+                  <div className={cn(
+                    "text-sm flex-1",
+                    isActive ? "text-foreground font-medium" : "text-foreground/80"
+                  )}>
+                    {topic.name}
+                  </div>
+                </button>
               );
             })}
           </div>
-
-          {/* Topic markers */}
-          {topics.map((topic, index) => {
-            const position = (topic.timestamp / duration) * 100;
-            const isActive = activeTopicIndex === index;
-            return (
-              <div
-                key={index}
-                className={cn(
-                  "absolute top-0 bottom-0 w-1 cursor-pointer transition-all group/marker",
-                  isActive ? "bg-accent" : "bg-secondary/60 hover:bg-secondary"
-                )}
-                style={{ left: `${position}%` }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleTopicMarkerClick(topic.timestamp);
-                }}
-              >
-                {/* Tooltip */}
-                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/marker:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                  <div className="bg-popover text-popover-foreground text-xs px-2 py-1 rounded border border-border shadow-lg">
-                    {topic.name}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
         </div>
-
-        {/* Time display */}
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>{formatTime(currentTime)}</span>
-          <span>{formatTime(duration)}</span>
-        </div>
-      </div>
-
-      {/* Controls */}
-      <div className="flex items-center gap-4">
-        {/* Play/Pause */}
-        <Button
-          onClick={togglePlayPause}
-          size="icon"
-          className="h-12 w-12 rounded-full bg-gradient-to-r from-primary to-secondary hover:opacity-90"
-        >
-          {isPlaying ? (
-            <Pause className="h-5 w-5 text-white" fill="white" />
-          ) : (
-            <Play className="h-5 w-5 text-white" fill="white" />
-          )}
-        </Button>
-
-        {/* Playback speed */}
-        <Button
-          onClick={handlePlaybackRateChange}
-          variant="outline"
-          size="sm"
-          className="font-semibold min-w-[60px]"
-        >
-          {playbackRate}x
-        </Button>
-
-        {/* Volume */}
-        <div className="flex items-center gap-2 flex-1 max-w-[200px]">
-          <Button
-            onClick={toggleMute}
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9"
-          >
-            {isMuted || volume === 0 ? (
-              <VolumeX className="h-4 w-4" />
-            ) : (
-              <Volume2 className="h-4 w-4" />
-            )}
-          </Button>
-          <Slider
-            value={[isMuted ? 0 : volume]}
-            onValueChange={handleVolumeChange}
-            max={1}
-            step={0.01}
-            className="flex-1"
-          />
-        </div>
-
-        {/* Download */}
-        <Button
-          onClick={handleDownload}
-          variant="ghost"
-          size="icon"
-          className="h-9 w-9 ml-auto"
-        >
-          <Download className="h-4 w-4" />
-        </Button>
-      </div>
+      )}
     </div>
   );
 };
