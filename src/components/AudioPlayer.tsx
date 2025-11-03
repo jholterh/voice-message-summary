@@ -549,15 +549,21 @@ const AudioPlayer = ({
                 <Volume2 className="h-4 w-4" />
               )}
             </Button>
-            <Slider
-              value={[volume]}
-              onValueChange={handleVolumeChange}
-              max={1}
-              step={0.01}
-              className="w-20 hidden sm:block"
-              aria-label="Volume"
-            />
+            <div className="w-20 hidden sm:flex items-center">
+              <Slider
+                value={[volume]}
+                onValueChange={handleVolumeChange}
+                max={1}
+                step={0.01}
+                className="w-full [&_[role=slider]]:h-3 [&_[role=slider]]:w-3 [&_[role=slider]]:border-2 [&_[role=slider]]:border-primary [&_[role=slider]]:bg-background [&_[role=slider]]:shadow-md [&_[role=slider]]:top-1/4 [&_[role=slider]]:-translate-y-1/4 [&>span]:h-1.5 [&>span]:bg-muted [&>span>span]:bg-primary"
+                aria-label="Volume"
+              />
+            </div>
           </div>
+
+
+
+
 
           {/* Playback speed */}
           <Button
